@@ -7,11 +7,13 @@ from typing import Any, Dict, List
 # 1. DATA STRUCTURES
 # ================================
 
+
 @dataclass
 class TaskResult:
-    status: str # "success" or "failure"
+    status: str  # "success" or "failure"
     output_data: Any = None
     error_code: str = None
+
 
 @dataclass
 class PipelineContext:
@@ -20,9 +22,11 @@ class PipelineContext:
     input_data: str
     upstream_results: Dict[str, Any] = field(default_factory=dict)
 
+
 # ================================
 # 2. OBSERVABILITY (Structured Logging)
 # ================================
+
 
 def log_trace(run_id: str, task_id: str, event_type: str, status: str, payload: Dict):
     trace_entry = {
@@ -34,9 +38,11 @@ def log_trace(run_id: str, task_id: str, event_type: str, status: str, payload: 
     }
     print(json.dumps(trace_entry))
 
+
 # ================================
 # 3. AGENT TASK INTERFACE & IMPLEMENTATIONS
 # ================================
+
 
 class AgentTask:
     def __init__(self, task_id: str, description: str):
@@ -45,6 +51,7 @@ class AgentTask:
 
     def execute(self, context: PipelineContext) -> TaskResult:
         raise NotImplementedError("Each specific agent must implement this.")
+
 
 class ReadTask(AgentTask):
     def execute(self, context: PipelineContext) -> TaskResult:
@@ -67,6 +74,7 @@ class ReadTask(AgentTask):
         )
         return TaskResult(status="success", output_data=output)
 
+
 class RewriteTask(AgentTask):
     def execute(self, context: PipelineContext) -> TaskResult:
         log_trace(
@@ -88,6 +96,7 @@ class RewriteTask(AgentTask):
             {"status": "formatted"},
         )
         return TaskResult(status="success", output_data=output)
+
 
 class ConvertTask(AgentTask):
     def __init__(self, task_id: str, description: str, inject_fault: bool = False):
@@ -126,6 +135,7 @@ class ConvertTask(AgentTask):
         )
         return TaskResult(status="success", output_data=output)
 
+
 class DeployTask(AgentTask):
     def execute(self, context: PipelineContext) -> TaskResult:
         log_trace(
@@ -139,17 +149,15 @@ class DeployTask(AgentTask):
         output = "https://storage.enterprise.local/docs/output.pdf"
 
         log_trace(
-            context.run_id,
-            self.task_id,
-            "action_end",
-            "success",
-            {"url": output}
+            context.run_id, self.task_id, "action_end", "success", {"url": output}
         )
         return TaskResult(status="success", output_data=output)
+
 
 # ================================
 # 4. DETERMINISTIC PIPELINE ORCHESTRATOR
 # ================================
+
 
 class AgentPipeline:
     def __init__(self, name: str):
@@ -191,13 +199,14 @@ class AgentPipeline:
                     "error",
                     {"failed_stage": task.task_id},
                 )
-                return # Pipeline bricht hier hart ab (Circuit Breaker)
+                return  # Pipeline bricht hier hart ab (Circuit Breaker)
 
             # 4. Sequential Handover
             upstream_results[task.task_id] = result.output_data
 
         print(f"\n✅ PIPELINE COMPLETED SUCCESSFULLY")
         print(f"Final Output: {upstream_results[self.tasks[-1].task_id]}\n")
+
 
 # ================================
 # 5. EXECUTION & INTEGRATION TEST
@@ -221,7 +230,7 @@ if __name__ == "__main__":
     pipeline_fail.add_task(RewriteTask("ID-002-REWRITE", "Format to markup"))
     pipeline_fail.add_task(
         ConvertTask("ID-003-CONVERT", "Render PDF", inject_fault=True)
-    ) # <--- FEHLER WIRD INJIZIERT
+    )  # <--- FEHLER WIRD INJIZIERT
     pipeline_fail.add_task(DeployTask("ID-004-DEPLOY", "Upload PDF"))
 
     pipeline_fail.run("Initial unformatted document text.")
