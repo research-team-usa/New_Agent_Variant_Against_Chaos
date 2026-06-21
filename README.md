@@ -36,6 +36,32 @@ This repository contains the full MVP implementation, including Docker, Kubernet
 ### **Pipeline Live Demo**
 - [Live Demo](https://lnkd.in/er-S9Kc2)
 
+
+## Architecture Mapping
+
+This repository implements the reference architecture from the demo `deterministic-ai-pipelines/` using practical, GitHub-friendly path names.
+
+| Reference (Demo Sketch) | Implementation in Repo | Purpose |
+|-------------------------|------------------------|---------|
+| `task_a_taxonomy/` | `task-a/` | Error taxonomy, reproduction scripts |
+| `├─ error_types.yaml` | `task-a/error_types.yaml` *(planned)* | Classification of error types |
+| `└─ detectors/` | `task-a/detectors/` *(planned)* | Detector modules |
+||
+| `task_b_playbook/` | `task-b/` | Failure simulations, trace logs |
+| `├─ failure_modes.md` | `task-b/failure_modes.md` *(planned)* | Documentation of failure modes |
+| `└─ runbooks/` | `task-b/runbooks/` *(planned)* | Runbooks for chaos testing |
+||
+| `task_c_pipeline/` | `task-c/prototype/` | Deterministic pipeline |
+| `├─ orchestrator.py` | `task-c/prototype/agent_pipeline.py` | **Implemented** – Orchestrator with circuit-breaker |
+| `├─ isolation/` | `task-c/prototype/isolation/` *(planned)* | Task isolation layer |
+| `└─ checkpoints/` | `task-c/prototype/checkpoints/` *(planned)* | State checkpoints |
+||
+| `observability/` | `task-c/monitoring/` | Monitoring stack |
+| `├─ prometheus.yml` | `task-c/monitoring/prometheus.yml` *(planned)* | Prometheus configuration |
+| `└─ grafana/dashboards/` | `task-c/monitoring/grafana/` *(planned)* | Grafana dashboards |
+||
+| `trace_schema_v1.json` | `docs/trace_schema_v1.json` *(planned)* | Global trace schema |
+| `docker-compose.yml` | `task-c/prototype/docker-compose.yml` | **Implemented** |
 ---
 
 ## 🧩 Features
