@@ -1,19 +1,13 @@
-# New_Agent_Variant_Against_Chaos
+New Agent Variant Against Chaos
+Deterministic AI Pipelines – 60-80% fewer unexplained failures
 
-Deterministic AI Pipelines
-From Chaos to Determinism – 60–80% fewer production failures
+Built openly with Human + AI Co-Creation (Meta AI, Lyra, Auron)
 
-Built openly with Human + AI Co-Creation.
+🚀 docker compose up → live demo in 30s
+📊 Helm chart ready for production
+🔍 UUID tracing + circuit breaker included
 
-Quickstart
-docker compose up --build
-
-Architecture
-Immutable PipelineContext (frozen dataclass)
-UUID v4 run_id + trace_id per event
-Sequential handover, no shared memory
-Circuit breaker on failure
-Watch the 8-min explainer 
+Watch 8-min explainer
 
 Pipelines Live-Video:
 - [Video](https://short-url.cc/1s6eC)
