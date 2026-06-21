@@ -1,5 +1,20 @@
 # Security Policy
-Here is the professional version with the executive table at the top — ready to copy into your README or documentation:
+
+## Supported Versions
+This repository is a private research prototype. Only the latest commit on the `main` branch receives best-effort maintenance.
+
+| Version | Supported |
+|---------|-----------|
+| 0.x (main) | ✅ |
+
+## Reporting a Vulnerability
+Please report security issues privately:
+1. Open a GitHub Issue with the `security` label, **or**
+2. Contact the maintainer directly via GitHub: @ShorxNetwork
+
+We do not operate a bug bounty program. As this is a zero-cost research environment, there is no SLA, but critical issues will be reviewed promptly.
+
+Please do not run automated vulnerability scanners against this repository – GitHub Advanced Security is intentionally disabled to avoid charges.
 
 ---
 
