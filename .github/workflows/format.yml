@@ -8,9 +8,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with:
+          python-version: '3.11'
       - run: pip install black
-      - run: black.
+      - run: black. # <- HIER das Leerzeichen!
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "style: auto-format [skip ci]"
