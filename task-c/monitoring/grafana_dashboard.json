@@ -1,0 +1,72 @@
+{
+  "id": null,
+  "title": "Deterministic Agent Pipeline",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Pipeline Runs",
+      "targets": [
+        {
+          "expr": "pipeline_run_total",
+          "legendFormat": "runs",
+          "refId": "A"
+        }
+      ],
+      "id": 1
+    },
+    {
+      "type": "graph",
+      "title": "Pipeline Errors",
+      "targets": [
+        {
+          "expr": "pipeline_run_errors_total",
+          "legendFormat": "errors",
+          "refId": "B"
+        }
+      ],
+      "id": 2
+    },
+    {
+      "type": "graph",
+      "title": "Stage Latency (Seconds)",
+      "targets": [
+        {
+          "expr": "pipeline_stage_latency_seconds",
+          "legendFormat": "{{stage}}",
+          "refId": "C"
+        }
+      ],
+      "id": 3
+    },
+    {
+      "type": "graph",
+      "title": "Agent Memory Usage (Bytes)",
+      "targets": [
+        {
+          "expr": "agent_memory_bytes",
+          "legendFormat": "{{agent_id}}",
+          "refId": "D"
+        }
+      ],
+      "id": 4
+    },
+    {
+      "type": "graph",
+      "title": "Iterations per Agent",
+      "targets": [
+        {
+          "expr": "agent_iterations_total",
+          "legendFormat": "{{agent_id}}",
+          "refId": "E"
+        }
+      ],
+      "id": 5
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}
