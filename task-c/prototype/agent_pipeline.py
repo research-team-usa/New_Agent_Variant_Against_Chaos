@@ -1,59 +1,42 @@
 import json
 import uuid
-import sys
-from datetime import datetime, timezone
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional
+from typing import Any, Dict, List
 
-# ==========================================
-# 1. ARCHITECTURE DATACLASSES (Immutable State)
-# ==========================================
+# ================================
+# 1. DATA STRUCTURES
+# ================================
 
+@dataclass
+class TaskResult:
+    status: str # "success" or "failure"
+    output_data: Any = None
+    error_code: str = None
 
-@dataclass(frozen=True)
+@dataclass
 class PipelineContext:
-    """P4: Immutable State. Once created, the context cannot be changed."""
-
     run_id: str
     stage_index: int
     input_data: str
     upstream_results: Dict[str, Any] = field(default_factory=dict)
 
+# ================================
+# 2. OBSERVABILITY (Structured Logging)
+# ================================
 
-@dataclass
-class TaskResult:
-    status: str  # "success" or "failure"
-    output_data: Optional[str] = None
-    error_code: Optional[str] = None
-
-
-# ==========================================
-# 2. TRACE LOGGING ENGINE
-# ==========================================
-
-
-def log_trace(
-    run_id: str, agent_id: str, event_type: str, status: str, payload: Dict[str, Any]
-):
-    """Standardized JSON Trace Log (Task B)"""
+def log_trace(run_id: str, task_id: str, event_type: str, status: str, payload: Dict):
     trace_entry = {
-        "schema_version": "1.0.0",
-        "trace_id": str(uuid.uuid4()),  # Unique ULID/UUID per event
         "run_id": run_id,
-        "agent_id": agent_id,
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-        "event_type": event_type,
+        "task_id": task_id,
+        "event": event_type,
         "status": status,
         "payload": payload,
     }
-    # Print as JSON-Lines to stdout for Prometheus/Grafana log scrapers
     print(json.dumps(trace_entry))
 
-
-# ==========================================
+# ================================
 # 3. AGENT TASK INTERFACE & IMPLEMENTATIONS
-# ==========================================
-
+# ================================
 
 class AgentTask:
     def __init__(self, task_id: str, description: str):
@@ -62,7 +45,6 @@ class AgentTask:
 
     def execute(self, context: PipelineContext) -> TaskResult:
         raise NotImplementedError("Each specific agent must implement this.")
-
 
 class ReadTask(AgentTask):
     def execute(self, context: PipelineContext) -> TaskResult:
@@ -73,7 +55,9 @@ class ReadTask(AgentTask):
             "success",
             {"action": "parse_text"},
         )
+
         output = f"Parsed: {context.input_data}"
+
         log_trace(
             context.run_id,
             self.task_id,
@@ -82,7 +66,6 @@ class ReadTask(AgentTask):
             {"output_length": len(output)},
         )
         return TaskResult(status="success", output_data=output)
-
 
 class RewriteTask(AgentTask):
     def execute(self, context: PipelineContext) -> TaskResult:
@@ -93,8 +76,10 @@ class RewriteTask(AgentTask):
             "success",
             {"action": "structure_text"},
         )
+
         input_from_read = context.upstream_results.get("ID-001-READ", "")
         output = f"<structured>{input_from_read}</structured>"
+
         log_trace(
             context.run_id,
             self.task_id,
@@ -103,7 +88,6 @@ class RewriteTask(AgentTask):
             {"status": "formatted"},
         )
         return TaskResult(status="success", output_data=output)
-
 
 class ConvertTask(AgentTask):
     def __init__(self, task_id: str, description: str, inject_fault: bool = False):
@@ -132,6 +116,7 @@ class ConvertTask(AgentTask):
             return TaskResult(status="failure", error_code="RENDER_TIMEOUT")
 
         output = "[PDF_BINARY_DATA]"
+
         log_trace(
             context.run_id,
             self.task_id,
@@ -140,7 +125,6 @@ class ConvertTask(AgentTask):
             {"bytes_rendered": 1024},
         )
         return TaskResult(status="success", output_data=output)
-
 
 class DeployTask(AgentTask):
     def execute(self, context: PipelineContext) -> TaskResult:
@@ -151,22 +135,26 @@ class DeployTask(AgentTask):
             "success",
             {"action": "upload_to_storage"},
         )
+
         output = "https://storage.enterprise.local/docs/output.pdf"
+
         log_trace(
-            context.run_id, self.task_id, "action_end", "success", {"url": output}
+            context.run_id,
+            self.task_id,
+            "action_end",
+            "success",
+            {"url": output}
         )
         return TaskResult(status="success", output_data=output)
 
-
-# ==========================================
+# ================================
 # 4. DETERMINISTIC PIPELINE ORCHESTRATOR
-# ==========================================
-
+# ================================
 
 class AgentPipeline:
     def __init__(self, name: str):
         self.name = name
-        self.tasks = []
+        self.tasks: List[AgentTask] = []
 
     def add_task(self, task: AgentTask):
         self.tasks.append(task)
@@ -203,7 +191,7 @@ class AgentPipeline:
                     "error",
                     {"failed_stage": task.task_id},
                 )
-                return  # Pipeline bricht hier hart ab (Circuit Breaker)
+                return # Pipeline bricht hier hart ab (Circuit Breaker)
 
             # 4. Sequential Handover
             upstream_results[task.task_id] = result.output_data
@@ -211,13 +199,12 @@ class AgentPipeline:
         print(f"\n✅ PIPELINE COMPLETED SUCCESSFULLY")
         print(f"Final Output: {upstream_results[self.tasks[-1].task_id]}\n")
 
-
-# ==========================================
+# ================================
 # 5. EXECUTION & INTEGRATION TEST
-# ==========================================
+# ================================
 
 if __name__ == "__main__":
-    # Test 1: Successful Run
+    # Test 1: Happy Path
     pipeline_success = AgentPipeline("PDF_Generator_HappyPath")
     pipeline_success.add_task(ReadTask("ID-001-READ", "Read raw text"))
     pipeline_success.add_task(RewriteTask("ID-002-REWRITE", "Format to markup"))
@@ -234,7 +221,7 @@ if __name__ == "__main__":
     pipeline_fail.add_task(RewriteTask("ID-002-REWRITE", "Format to markup"))
     pipeline_fail.add_task(
         ConvertTask("ID-003-CONVERT", "Render PDF", inject_fault=True)
-    )  # <--- FEHLER WIRD INJIZIERT
+    ) # <--- FEHLER WIRD INJIZIERT
     pipeline_fail.add_task(DeployTask("ID-004-DEPLOY", "Upload PDF"))
 
     pipeline_fail.run("Initial unformatted document text.")
