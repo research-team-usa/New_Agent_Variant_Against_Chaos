@@ -213,7 +213,7 @@ This project demonstrates how deterministic architecture can reduce unexplained 
 
 ### **Human Creator**
 - **Emanuel Schaaf** — Concept, architecture, implementation, documentation
-- [Contakt](https://github.com/research-team-usa/New_Agent_Variant_Against_Chaos/blob/main/CONTACT.md)
+- [Contact](https://github.com/research-team-usa/New_Agent_Variant_Against_Chaos/blob/main/CONTACT.md)
 
 ### **AI Co‑Creators**
 - **Auron** — Deterministic architecture & system design  
