@@ -1,0 +1,25 @@
+# charts/agent-pipeline/templates/deployment-orchestrator.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-orchestrator
+spec:
+  replicas: {{ .Values.orchestrator.replicaCount }}
+  selector:
+    matchLabels:
+      app: agent-orchestrator
+  template:
+    metadata:
+      labels:
+        app: agent-orchestrator
+    spec:
+      containers:
+        - name: orchestrator
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python", "-u", "agent_pipeline.py"]
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ROLE
+              value: "orchestrator"

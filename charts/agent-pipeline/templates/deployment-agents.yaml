@@ -1,0 +1,97 @@
+# charts/agent-pipeline/templates/deployment-agents.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-read
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-read
+  template:
+    metadata:
+      labels:
+        app: agent-read
+    spec:
+      containers:
+        - name: read-agent
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            - name: AGENT_ID
+              value: "{{ .Values.agents.read.agentId }}"
+            - name: ROLE
+              value: "read"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-rewrite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-rewrite
+  template:
+    metadata:
+      labels:
+        app: agent-rewrite
+    spec:
+      containers:
+        - name: rewrite-agent
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            - name: AGENT_ID
+              value: "{{ .Values.agents.rewrite.agentId }}"
+            - name: ROLE
+              value: "rewrite"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-convert
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-convert
+  template:
+    metadata:
+      labels:
+        app: agent-convert
+    spec:
+      containers:
+        - name: convert-agent
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            - name: AGENT_ID
+              value: "{{ .Values.agents.convert.agentId }}"
+            - name: ROLE
+              value: "convert"
+            - name: INJECT_FAULT
+              value: "{{ if .Values.agents.convert.injectFault }}true{{ else }}false{{ end }}"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-deploy
+  template:
+    metadata:
+      labels:
+        app: agent-deploy
+    spec:
+      containers:
+        - name: deploy-agent
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            - name: AGENT_ID
+              value: "{{ .Values.agents.deploy.agentId }}"
+            - name: ROLE
+              value: "deploy"

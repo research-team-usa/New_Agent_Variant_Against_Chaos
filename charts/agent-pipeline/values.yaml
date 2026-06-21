@@ -1,0 +1,29 @@
+# charts/agent-pipeline/values.yaml
+image:
+  repository: your-registry/agent-pipeline
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+orchestrator:
+  enabled: true
+  replicaCount: 1
+
+agents:
+  read:
+    enabled: true
+    agentId: "ID-001-READ"
+  rewrite:
+    enabled: true
+    agentId: "ID-002-REWRITE"
+  convert:
+    enabled: true
+    agentId: "ID-003-CONVERT"
+    injectFault: false
+  deploy:
+    enabled: true
+    agentId: "ID-004-DEPLOY"
+
+prometheus:
+  enabled: true
+grafana:
+  enabled: true
