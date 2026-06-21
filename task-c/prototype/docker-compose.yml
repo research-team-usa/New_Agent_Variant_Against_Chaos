@@ -1,0 +1,79 @@
+version: "3.9"
+
+services:
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orchestrator
+    command: ["python", "-u", "agent_pipeline.py"]
+    depends_on:
+      - read_agent
+      - rewrite_agent
+      - convert_agent
+      - deploy_agent
+    networks:
+      - agent_net
+
+  read_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: read_agent
+    environment:
+      AGENT_ID: "ID-001-READ"
+    networks:
+      - agent_net
+
+  rewrite_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rewrite_agent
+    environment:
+      AGENT_ID: "ID-002-REWRITE"
+    networks:
+      - agent_net
+
+  convert_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: convert_agent
+    environment:
+      AGENT_ID: "ID-003-CONVERT"
+      INJECT_FAULT: "true" #or false
+    networks:
+      - agent_net
+
+  deploy_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deploy_agent
+    environment:
+      AGENT_ID: "ID-004-DEPLOY"
+    networks:
+      - agent_net
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - agent_net
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - agent_net
+
+networks:
+  agent_net:
+    driver: bridge
