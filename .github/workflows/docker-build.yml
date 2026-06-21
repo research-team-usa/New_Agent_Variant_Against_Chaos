@@ -1,0 +1,21 @@
+name: Docker Build
+
+on:
+  push:
+    tags: [ 'v*' ]      # baut NUR bei git tag v1.0, v2.0 etc.
+  workflow_dispatch:   # manuell startbar
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t agent-pipeline:${{ github.ref_name }} ./task-c/prototype
+
+      - name: Test run
+        run: docker run --rm agent-pipeline:${{ github.ref_name }} python -u agent_pipeline.py
